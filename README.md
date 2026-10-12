@@ -22,6 +22,10 @@ So this is a tiny, friendly, **French-first** page that answers it quickly:
 
 The rule of thumb: **if it shows up near the top of a type you raid with, keep it.**
 
+## 👉 Open it: https://arthurg-data.github.io/pokemon-go-ranking/
+
+Bookmark it on your phone. The data rebuilds every morning, so *Right now* always shows the current raids, eggs and research.
+
 ## How to use it: the storage-cleanup routine
 
 **1. Set the filters to match your collection.** No Legendaries in the box? Tick *Legendary*.
@@ -69,7 +73,9 @@ picked between options, and said "looks good!". The design notes and plan it wor
 
 It still has real tests: 51 of them, including a headless-browser check of the page.
 
-## Run it
+## Run it locally
+
+You only need this to work on the code. Everyone else can use the link above.
 
 ```bash
 uv sync
