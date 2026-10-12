@@ -39,7 +39,7 @@ def test_combo_dps_matches_hand_computation():
     assert s.dps == pytest.approx(15.934, abs=0.001)
     assert s.tdo == pytest.approx(15.934 * 150 / 6, abs=0.05)
     assert s.rating == pytest.approx(rating(s.dps, s.tdo))
-    assert rating(s.dps, s.tdo) == pytest.approx((s.dps ** 3 * s.tdo) ** 0.25)
+    assert rating(s.dps, s.tdo) == pytest.approx((s.dps * s.tdo) ** 0.5)   # balanced: DPS and TDO weigh the same
 
 
 def test_combo_effectiveness_raises_score():
@@ -66,3 +66,8 @@ def test_defender_rating_favours_bulk_over_damage():
     mewtwo = level40_stats(300, 182, 214)       # glass cannon (defender DPS ≈ 9.6)
     snorlax = level40_stats(190, 169, 330)      # defender DPS ≈ 4.9
     assert defender_rating(3.5, blissey) > defender_rating(4.9, snorlax) > defender_rating(9.6, mewtwo)
+
+
+def test_rating_rewards_tdo_as_much_as_dps():
+    assert rating(10.0, 400.0) == pytest.approx(rating(20.0, 200.0))
+    assert rating(15.0, 520.0) > rating(18.5, 340.0)    # bulky Kingdra-like beats glass-cannon Kingler-like

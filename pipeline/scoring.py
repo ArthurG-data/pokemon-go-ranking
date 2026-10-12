@@ -59,7 +59,8 @@ def move_score(move: Move, stats: Stats, mover_types, eff: float = 1.0, *,
 
 
 def rating(dps: float, tdo: float) -> float:
-    return (dps ** 3 * tdo) ** 0.25 if dps > 0 and tdo > 0 else 0.0
+    """Balanced attack score: DPS and TDO weigh the same (geometric mean)."""
+    return math.sqrt(dps * tdo) if dps > 0 and tdo > 0 else 0.0
 
 
 def combo(fast: Move, charged: Move, stats: Stats, mover_types, eff_fast: float = 1.0, eff_charged: float = 1.0,

@@ -65,6 +65,7 @@ function legalMovesets(p) { return state.filters.elite ? p.movesets.filter(m => 
 function defenderOf(p) { return state.filters.elite ? p.defender_no_elite : p.defender; }
 function bestMoveset(p, typeId, mode) {
   let best = null, score = 0;
+  if (mode === 'attackers' && !p.types.includes(typeId)) return null;   // attackers of a type are Pokémon of that type
   for (const m of legalMovesets(p)) {
     if (mode === 'attackers' && m.type !== typeId) continue;
     const s = mode === 'attackers' ? m.rating : m.vs[typeId];
@@ -78,7 +79,10 @@ function rankedForType(typeId, mode) {
   for (const p of DATA.pokemon) {
     if (!visible(p)) continue;
     const b = bestMoveset(p, typeId, mode);
-    if (b) rows.push({p, ms: b.ms, score: b.score});
+    if (!b) continue;
+    // Score = √(DPS × TDO) and TDO ∝ DPS, so the vs-type DPS/TDO are the neutral ones × (score / neutral rating).
+    const k = b.ms.rating > 0 ? b.score / b.ms.rating : 1;
+    rows.push({p, ms: b.ms, score: b.score, dps: b.ms.dps * k, tdo: b.ms.tdo * k});
   }
   rows.sort((a, b) => b.score - a.score);
   return rows;
@@ -91,7 +95,7 @@ function topSlice(rows) { return state.topn > 0 ? rows.slice(0, state.topn) : ro
 function applySort(rows) {
   if (!state.sort) return rows;
   const {key, dir} = state.sort;
-  const val = r => key === 'name' ? r.p.name_fr : key === 'dps' ? r.ms.dps : key === 'tdo' ? r.ms.tdo : key === 'defend' ? defenderOf(r.p).rating : r.score;
+  const val = r => key === 'name' ? r.p.name_fr : key === 'dps' ? r.dps : key === 'tdo' ? r.tdo : key === 'defend' ? defenderOf(r.p).rating : r.score;
   return rows.slice().sort((a, b) => { const x = val(a), y = val(b); return (x < y ? -1 : x > y ? 1 : 0) * dir; });
 }
 
@@ -121,7 +125,7 @@ function renderType(typeId) {
       <td>${r.rank}</td><td>${nameCell(r.p)}</td>
       <td>${esc(moveName(r.ms.fast))}</td>
       <td>${esc(moveName(r.ms.charged))}${etm(r.ms)}</td>
-      <td>${r.ms.dps.toFixed(1)}</td><td>${Math.round(r.ms.tdo)}</td>
+      <td>${r.dps.toFixed(1)}</td><td>${Math.round(r.tdo)}</td>
       <td>${bar(r.score, max, 'atk')}</td><td>${defenderOf(r.p).rating > 0 ? bar(defenderOf(r.p).rating, maxDef, 'def') : '–'}</td>
     </tr>`).join('');
   view.innerHTML = `
@@ -158,7 +162,7 @@ function renderDetail(id) {
 
   const rankings = [];
   for (const t of DATA.types) {
-    if (!msets.some(m => m.type === t.id)) continue;
+    if (!p.types.includes(t.id) || !msets.some(m => m.type === t.id)) continue;
     const rows = rankedForType(t.id, 'attackers');
     const i = rows.findIndex(r => r.p.id === p.id);
     rankings.push({t: t.id, rank: i >= 0 ? i + 1 : null, of: rows.length});
