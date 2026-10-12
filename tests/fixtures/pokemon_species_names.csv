@@ -1,0 +1,43 @@
+pokemon_species_id,local_language_id,name,genus
+4,5,Salamèche,Pokémon Lézard
+4,9,Charmander,Lizard Pokémon
+5,5,Reptincel,Pokémon Flamme
+5,9,Charmeleon,Flame Pokémon
+6,5,Dracaufeu,Pokémon Flamme
+6,9,Charizard,Flame Pokémon
+25,5,Pikachu,Pokémon Souris
+25,9,Pikachu,Mouse Pokémon
+26,5,Raichu,Pokémon Souris
+26,9,Raichu,Mouse Pokémon
+113,5,Leveinard,Pokémon Œuf
+113,9,Chansey,Egg Pokémon
+132,5,Métamorph,Pokémon Morphing
+132,9,Ditto,Transform Pokémon
+150,5,Mewtwo,Pokémon Génétique
+150,9,Mewtwo,Genetic Pokémon
+151,5,Mew,Pokémon Nouveau
+151,9,Mew,New Species Pokémon
+172,5,Pichu,Pokémon Minisouris
+172,9,Pichu,Tiny Mouse Pokémon
+242,5,Leuphorie,Pokémon Bonheur
+242,9,Blissey,Happiness Pokémon
+249,5,Lugia,Pokémon Plongeon
+249,9,Lugia,Diving Pokémon
+382,5,Kyogre,Pokémon Bassinmarin
+382,9,Kyogre,Sea Basin Pokémon
+386,5,Deoxys,Pokémon ADN
+386,9,Deoxys,DNA Pokémon
+440,5,Ptiravi,Pokémon Maisonjouet
+440,9,Happiny,Playhouse Pokémon
+479,5,Motisma,Pokémon Plasma
+479,9,Rotom,Plasma Pokémon
+487,5,Giratina,Pokémon Renégat
+487,9,Giratina,Renegade Pokémon
+554,5,Darumarond,Pokémon Daruma
+554,9,Darumaka,Zen Charm Pokémon
+555,5,Darumacho,Pokémon Enflammé
+555,9,Darmanitan,Blazing Pokémon
+645,5,Démétéros,Pokémon Fertilité
+645,9,Landorus,Abundance Pokémon
+798,5,Katagami,Pokémon Battô
+798,9,Kartana,Drawn Sword Pokémon
