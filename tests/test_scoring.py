@@ -59,3 +59,10 @@ def test_defender_rating_scale():
     blissey = level40_stats(129, 169, 496)
     assert 30 < defender_rating(5.0, blissey) < 90
     assert defender_rating(0.0, blissey) == 0.0
+
+
+def test_defender_rating_favours_bulk_over_damage():
+    blissey = level40_stats(129, 169, 496)      # huge HP, weak attack (defender DPS ≈ 3.5)
+    mewtwo = level40_stats(300, 182, 214)       # glass cannon (defender DPS ≈ 9.6)
+    snorlax = level40_stats(190, 169, 330)      # defender DPS ≈ 4.9
+    assert defender_rating(3.5, blissey) > defender_rating(4.9, snorlax) > defender_rating(9.6, mewtwo)

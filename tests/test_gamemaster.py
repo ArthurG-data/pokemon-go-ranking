@@ -94,3 +94,9 @@ def test_numeric_move_ids_are_resolved_to_names():
     assert gm.moves["PLASMA_FISTS"].power == 135.0 and gm.moves["PLASMA_FISTS"].type == "ELECTRIC"
     assert "PLASMA_FISTS" in gm.by_id()["MEW"].charged_moves
     assert all(isinstance(m, str) for p in gm.pokemon for m in p.all_fast() + p.all_charged())
+
+
+def test_raid_boss_only_forms_are_dropped():
+    from pipeline.gamemaster import COSTUME_RE
+    assert COSTUME_RE.search("ETERNAMAX")
+    assert not COSTUME_RE.search("ORIGIN") and not COSTUME_RE.search("ALOLA")

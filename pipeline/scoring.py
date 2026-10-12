@@ -15,7 +15,8 @@ SHADOW_DEF = 1 / 1.2
 TARGET_DEF = 180.0          # reference raid-boss defense the attacker hits
 INCOMING = 900.0            # incoming damage pressure; y = INCOMING / defense
 DEFENDER_DELAY_MS = 2000    # gym defenders pause 2 s between moves
-DEFENDER_SCALE = 9.0        # sqrt(dps * hp * def) / scale ≈ 60 for the best defenders
+DEFENDER_SCALE = 86.0       # (hp*def)^0.75 * dps^0.25 / scale ≈ 60 for the best defenders
+DEFENDER_BULK_WEIGHT = 0.75 # gym value is mostly how long it survives
 
 
 @dataclass(frozen=True)
@@ -77,4 +78,8 @@ def combo(fast: Move, charged: Move, stats: Stats, mover_types, eff_fast: float 
 
 
 def defender_rating(def_dps: float, stats: Stats) -> float:
-    return math.sqrt(max(def_dps, 0.0) * stats.hp * stats.dfn) / DEFENDER_SCALE
+    """Heuristic gym value: bulk (hp × defense) weighted 3:1 over the damage it deals back."""
+    if def_dps <= 0:
+        return 0.0
+    w = DEFENDER_BULK_WEIGHT
+    return (stats.hp * stats.dfn) ** w * def_dps ** (1 - w) / DEFENDER_SCALE

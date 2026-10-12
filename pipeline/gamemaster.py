@@ -17,7 +17,7 @@ _TEMP_PREFIX = "TEMP_EVOLUTION_"
 # Costume / event clones that are not gameplay forms.
 COSTUME_RE = re.compile(
     r"(COPY|COSTUME|FALL_|WINTER_|WCS|GOTOUR|TSHIRT|GOFEST|WILDAREA|HALLOWEEN|HOLIDAY|FASHION|PARTY"
-    r"|ANNIV|FLYING_|KARIYUSHI|DOCTOR|LIBRE|POP_STAR|ROCK_STAR|VS_|^\d{4}$|_\d{4}$|_\d{4}_)"
+    r"|ANNIV|FLYING_|KARIYUSHI|DOCTOR|LIBRE|POP_STAR|ROCK_STAR|VS_|ETERNAMAX|^\d{4}$|_\d{4}$|_\d{4}_)"
 )
 MOVE_KEYS = ("quickMoves", "cinematicMoves", "eliteQuickMove", "eliteCinematicMove")
 _MOVE_TEMPLATE_RE = re.compile(r"^V\d{4}_MOVE_(.+)$")
