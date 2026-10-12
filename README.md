@@ -22,6 +22,34 @@ So this is a tiny, friendly, **French-first** page that answers it quickly:
 
 The rule of thumb: **if it shows up near the top of a type you raid with, keep it.**
 
+## How to use it: the storage-cleanup routine
+
+**1. Set the filters to match your collection.** No Legendaries in the box? Tick *Legendary*.
+No Mega Energy? Tick *Mega*. Every list then shows only Pokémon you could actually own.
+
+**2. Look at the types you raid with.** The landing page shows the top 3 for every type.
+
+![All 18 types with the top 3 attackers of each](docs/screenshots/1-types.png)
+
+**3. Open a type to see the full ranking.** Here are the Water attackers with Legendaries and Megas hidden.
+Each row shows the best moveset, an *ETM* badge if that moveset needs an Elite TM, the attack score and the gym score.
+
+![Water attackers, Legendaries and Megas hidden](docs/screenshots/2-type-table.png)
+
+**4. Not sure about one Pokémon? Search it.** French or English, with or without accents.
+
+![Searching "ossa" finds Ossatueur and its forms](docs/screenshots/3-search.png)
+
+**5. Read its card and decide.** Ossatueur (Marowak) ranks **#157 of 277** Ground attackers and #525 as a gym defender.
+**That's a transfer.** The *How to get it* box also tells you it takes 50 Osselait candy, and that there's a shadow
+version from Team GO Rocket if you want a stronger one later.
+
+![Ossatueur detail: movesets, rankings, counter grid, how to get it](docs/screenshots/4-detail.png)
+
+**Bonus: find what to leave in gyms.** The *Gym defenders* tab ranks the bulkiest Pokémon you can place.
+
+![Best gym defenders](docs/screenshots/5-gym.png)
+
 ## Why it's fun
 
 - 🧮 **The numbers are real.** Ratings are computed from the game's own data file (the
