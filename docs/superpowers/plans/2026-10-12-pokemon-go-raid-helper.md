@@ -810,6 +810,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from typing import NamedTuple
 
 from .gamemaster import Move
 
@@ -831,14 +832,12 @@ class Stats:
     hp: int
 
 
-@dataclass(frozen=True)
-class MoveScore:
+class MoveScore(NamedTuple):
     dps: float
     eps: float
 
 
-@dataclass(frozen=True)
-class ComboScore:
+class ComboScore(NamedTuple):
     dps: float
     tdo: float
     rating: float
