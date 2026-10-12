@@ -67,3 +67,11 @@ def test_gym_tab_and_no_moveset_pokemon(site, page):
     page.goto(site + "#p/DITTO")
     expect(page.locator("h1")).to_contain_text("Métamorph")
     expect(page.locator(".panel").first).to_contain_text("No damaging moveset")
+
+
+def test_pokemon_that_cannot_defend_show_a_dash(site, page):
+    page.goto(site + "#type/FIRE")
+    row = page.locator("table.rk tbody tr", has_text="Méga-Dracaufeu Y")
+    expect(row.locator("td").last).to_have_text("–")
+    page.goto(site + "#gym")
+    expect(page.locator(".crumbs")).to_contain_text("bulk weighted 3:1 over damage")

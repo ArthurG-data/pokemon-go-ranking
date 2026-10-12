@@ -122,7 +122,7 @@ function renderType(typeId) {
       <td>${esc(moveName(r.ms.fast))}</td>
       <td>${esc(moveName(r.ms.charged))}${etm(r.ms)}</td>
       <td>${r.ms.dps.toFixed(1)}</td><td>${Math.round(r.ms.tdo)}</td>
-      <td>${bar(r.score, max, 'atk')}</td><td>${bar(defenderOf(r.p).rating, maxDef, 'def')}</td>
+      <td>${bar(r.score, max, 'atk')}</td><td>${defenderOf(r.p).rating > 0 ? bar(defenderOf(r.p).rating, maxDef, 'def') : '–'}</td>
     </tr>`).join('');
   view.innerHTML = `
     <div class="crumbs"><a href="#">← All types</a> ${chip(typeId, 'big')} <h1>${title}</h1><span class="muted">${all.length} Pokémon</span></div>
@@ -142,12 +142,91 @@ function renderGym() {
     const d = defenderOf(p);
     return `<tr><td>${i + 1}</td><td>${nameCell(p)}</td><td>${esc(moveName(d.fast))}</td><td>${esc(moveName(d.charged))}</td><td>${bar(d.rating, max, 'def')}</td></tr>`;
   }).join('');
-  view.innerHTML = `<div class="crumbs"><h1>Best gym defenders</h1><span class="muted">${all.length} Pokémon · heuristic: defender DPS × bulk</span></div>
+  view.innerHTML = `<div class="crumbs"><h1>Best gym defenders</h1><span class="muted">${all.length} Pokémon · heuristic: bulk weighted 3:1 over damage · Megas and Mythicals cannot defend</span></div>
     <table class="rk"><thead><tr><th>#</th><th>Pokémon</th><th>Fast</th><th>Charged</th><th>Defend</th></tr></thead><tbody>${body}</tbody></table>`;
 }
 
-function renderDetail(id) {   // replaced in Task 9
-  view.innerHTML = `<p class="muted">Detail page for ${esc(id)} is not built yet.</p>`;
+const SOURCE_LABELS = {wild: 'Wild', eggs: 'Eggs', evolve: 'Evolve', raids: 'Raids', research: 'Research',
+                       rocket: 'Team GO Rocket', mega_energy: 'Mega Energy (Mega Raids)'};
+const NOW_LABELS = {raid: '⚔️ Raid', egg: '🥚 Egg', research: '🎁 Research'};
+
+function renderDetail(id) {
+  const p = BY_ID.get(id);
+  if (!p) { view.innerHTML = '<p>Unknown Pokémon.</p>'; return; }
+  const msets = legalMovesets(p);
+  const hidden = !visible(p);
+
+  const rankings = [];
+  for (const t of DATA.types) {
+    if (!msets.some(m => m.type === t.id)) continue;
+    const rows = rankedForType(t.id, 'attackers');
+    const i = rows.findIndex(r => r.p.id === p.id);
+    rankings.push({t: t.id, rank: i >= 0 ? i + 1 : null, of: rows.length});
+  }
+  const gym = rankedGym();
+  const gi = gym.findIndex(q => q.id === p.id);
+  const d = defenderOf(p);
+
+  const vsOf = t => msets.length ? Math.max(...msets.map(m => m.vs[t])) : 0;
+  const vsMax = Math.max(1, ...DATA.types.map(t => vsOf(t.id)));
+  const grid = DATA.types.map(t => {
+    const v = vsOf(t.id);
+    return `<div class="cell ${DARK_TEXT.has(t.id) ? 'dark-text' : ''}" style="background:${TYPE_COLORS[t.id]};opacity:${(0.25 + 0.75 * v / vsMax).toFixed(2)}" title="${esc(typeName(t.id))}: ${v.toFixed(1)}"><span>${esc(typeName(t.id)).slice(0, 4)}</span><b>${v.toFixed(0)}</b></div>`;
+  }).join('');
+
+  const forms = p.forms.map(fid => BY_ID.get(fid)).filter(Boolean)
+    .map(q => `<a href="#p/${encodeURIComponent(q.id)}">${esc(q.name_fr)}</a>`).join(' · ');
+  const msRows = msets.map(m => `<div class="kv"><span>${chip(m.type, 'small')} ${esc(moveName(m.fast))} / ${esc(moveName(m.charged))}${etm(m)}</span><b>${m.rating.toFixed(1)}</b></div>`).join('')
+    || '<div class="muted">No damaging moveset.</div>';
+  const rankRows = rankings.map(r => `<div class="kv"><span>${esc(typeName(r.t))} attackers</span><b>${r.rank ? `#${r.rank} of ${r.of}` : 'hidden by filters'}</b></div>`).join('');
+
+  const g = p.get;
+  const evo = g.evo_line.map((e, i) => {
+    const node = `<a class="evo-node ${e.id === p.id ? 'me' : ''}" href="#p/${encodeURIComponent(e.id)}"><img src="${e.sprite || PLACEHOLDER}" alt="" onerror="this.onerror=null;this.src='${PLACEHOLDER}'"><span>${esc(e.name_fr)}</span></a>`;
+    const arrow = i < g.evo_line.length - 1 ? `<div class="arrow">${e.candy != null ? e.candy + ' candy' : ''}<br>→</div>` : '';
+    return node + arrow;
+  }).join('');
+  const src = g.sources.map(s => `<span class="src">${SOURCE_LABELS[s] || s}</span>`).join('');
+  const megas = g.megas.map(m => BY_ID.get(m)).filter(Boolean)
+    .map(q => `<a href="#p/${encodeURIComponent(q.id)}">${esc(q.name_fr)}</a>`).join(', ');
+  const now = g.now.length
+    ? g.now.map(n => `<div class="kv"><span>${NOW_LABELS[n.kind] || n.kind}: ${esc(n.who)}</span><b>${esc(n.label)}</b></div>`).join('')
+    : '<div class="muted">Nothing in the current feed.</div>';
+
+  view.innerHTML = `
+    <div class="detail">
+      <div class="dp-head">
+        <img class="art" src="${p.art}" alt="" onerror="this.onerror=null;this.src='${PLACEHOLDER}'">
+        <div>
+          <h1>${esc(p.name_fr)} <span class="muted en">${esc(p.name_en)} · #${String(p.dex).padStart(3, '0')}</span></h1>
+          <div>${p.types.map(t => chip(t)).join(' ')} ${badges(p)}</div>
+          ${forms ? `<div class="muted">Other forms: ${forms}</div>` : ''}
+          <div>Attack <b>${p.stats.atk}</b> · Defense <b>${p.stats.def}</b> · Stamina <b>${p.stats.sta}</b>
+            <span class="muted">(level 40: ${p.l40.atk} / ${p.l40.def} / ${p.l40.hp} HP)</span></div>
+          ${hidden ? '<div class="warn">Hidden from rankings by the current filters.</div>' : ''}
+        </div>
+      </div>
+      <div class="dp-cols">
+        <div>
+          <div class="panel"><h5>Best movesets</h5>${msRows}</div>
+          <div class="panel"><h5>Rankings</h5>${rankRows}
+            <div class="kv"><span>Gym defender</span><b>${d.rating ? d.rating.toFixed(1) + (gi >= 0 ? ` · #${gi + 1} of ${gym.length}` : '') : '–'}</b></div>
+          </div>
+          <div class="panel"><h5>Counter score vs boss type</h5><div class="grid18">${grid}</div>
+            <div class="muted small">Best moveset's rating against a single-type boss. Does not model the boss hitting back.</div></div>
+        </div>
+        <div>
+          <div class="panel howto"><h5>How to get it</h5>
+            <div class="evo">${evo}</div>
+            ${g.buddy_km ? `<div class="kv"><span>Buddy distance</span><b>${g.buddy_km} km</b></div>` : ''}
+            <div class="kv"><span>Shadow form</span><b>${g.has_shadow ? 'Yes, from Team GO Rocket' : 'No'}</b></div>
+            ${megas ? `<div class="kv"><span>Mega</span><b>${megas} · Mega Energy from Mega Raids</b></div>` : ''}
+            <div class="srcs">${src}</div>
+            <div class="live"><b>Right now</b> <span class="muted">(LeekDuck feed, data built ${esc(DATA.built)})</span>${now}</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
 }
 
 // ---------- routing & controls ----------
@@ -177,6 +256,37 @@ function bindControls() {
   topn.addEventListener('change', () => { state.topn = Number(topn.value); saveSettings(); route(); });
 }
 
+function bindSearch() {
+  const input = document.getElementById('search');
+  const list = document.getElementById('search-results');
+  let results = [];
+  const hide = () => { list.hidden = true; };
+  const show = () => {
+    const q = norm(input.value.trim());
+    if (!q || !DATA) { hide(); return; }
+    const score = p => {
+      const fr = norm(p.name_fr), en = norm(p.name_en);
+      if (fr.startsWith(q) || en.startsWith(q)) return 0;
+      if (fr.includes(q) || en.includes(q)) return 1;
+      return -1;
+    };
+    results = DATA.pokemon.map(p => ({p, s: score(p)})).filter(x => x.s >= 0)
+      .sort((a, b) => a.s - b.s || a.p.dex - b.p.dex || a.p.id.localeCompare(b.p.id))
+      .slice(0, 8).map(x => x.p);
+    list.innerHTML = results.map(p => `<li><a href="#p/${encodeURIComponent(p.id)}">${sprite(p)}<span>${esc(p.name_fr)}</span><span class="muted">${esc(p.name_en)}</span>${badges(p)}</a></li>`).join('')
+      || '<li class="muted">No match</li>';
+    list.hidden = false;
+  };
+  input.addEventListener('input', show);
+  input.addEventListener('focus', show);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && results.length) { location.hash = '#p/' + encodeURIComponent(results[0].id); input.blur(); hide(); }
+    if (e.key === 'Escape') { hide(); input.blur(); }
+  });
+  list.addEventListener('click', () => { hide(); input.value = ''; });
+  document.addEventListener('click', e => { if (!e.target.closest('.search')) hide(); });
+}
+
 async function init() {
   loadSettings();
   bindControls();
@@ -189,6 +299,7 @@ async function init() {
     return;
   }
   for (const p of DATA.pokemon) BY_ID.set(p.id, p);
+  bindSearch();
   document.getElementById('built').textContent = `Data built ${DATA.built} · level 40, 15/15/15 IVs · comboDPS-based estimates, not simulations`;
   window.addEventListener('hashchange', route);
   route();
