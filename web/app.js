@@ -112,13 +112,13 @@ function renderLanding() {
 function renderType(typeId) {
   if (!TYPE_COLORS[typeId]) { view.innerHTML = '<p>Unknown type.</p>'; return; }
   const all = rankedForType(typeId);
-  const rows = topSlice(applySort(all));
+  const rows = applySort(topSlice(all.map((r, i) => ({...r, rank: i + 1}))));   // Top N first, then sort within it
   const max = all.length ? all[0].score : 0;
   const maxDef = Math.max(0, ...all.map(r => defenderOf(r.p).rating));
   const title = state.mode === 'attackers' ? `Best ${esc(typeName(typeId))} attackers` : `Best counters vs ${esc(typeName(typeId))}`;
   const th = (key, label) => `<th data-sort="${key}" class="${state.sort && state.sort.key === key ? (state.sort.dir > 0 ? 'asc' : 'desc') : ''}">${label}</th>`;
-  const body = rows.map((r, i) => `<tr>
-      <td>${i + 1}</td><td>${nameCell(r.p)}</td>
+  const body = rows.map(r => `<tr>
+      <td>${r.rank}</td><td>${nameCell(r.p)}</td>
       <td>${esc(moveName(r.ms.fast))}</td>
       <td>${esc(moveName(r.ms.charged))}${etm(r.ms)}</td>
       <td>${r.ms.dps.toFixed(1)}</td><td>${Math.round(r.ms.tdo)}</td>
@@ -142,7 +142,7 @@ function renderGym() {
     const d = defenderOf(p);
     return `<tr><td>${i + 1}</td><td>${nameCell(p)}</td><td>${esc(moveName(d.fast))}</td><td>${esc(moveName(d.charged))}</td><td>${bar(d.rating, max, 'def')}</td></tr>`;
   }).join('');
-  view.innerHTML = `<div class="crumbs"><h1>Best gym defenders</h1><span class="muted">${all.length} Pokémon · heuristic: bulk weighted 3:1 over damage · Megas and Mythicals cannot defend</span></div>
+  view.innerHTML = `<div class="crumbs"><h1>Best gym defenders</h1><span class="muted">${all.length} Pokémon · heuristic: bulk weighted 3:1 over damage · only Pokémon the game lets you place (no Legendaries, Mythicals, Megas or Shadows)</span></div>
     <table class="rk"><thead><tr><th>#</th><th>Pokémon</th><th>Fast</th><th>Charged</th><th>Defend</th></tr></thead><tbody>${body}</tbody></table>`;
 }
 

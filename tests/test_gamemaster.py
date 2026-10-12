@@ -100,3 +100,39 @@ def test_raid_boss_only_forms_are_dropped():
     from pipeline.gamemaster import COSTUME_RE
     assert COSTUME_RE.search("ETERNAMAX")
     assert not COSTUME_RE.search("ORIGIN") and not COSTUME_RE.search("ALOLA")
+
+
+def _entries():
+    return json.loads(FIX.read_text(encoding="utf-8"))
+
+
+def test_normal_template_wins_over_conflicting_formless_template():
+    entries = _entries()
+    for e in entries:
+        p = e.get("data", {}).get("pokemonSettings")
+        if p and p["pokemonId"] == "CHARIZARD" and not p.get("form"):
+            p["cinematicMoves"] = [m for m in p["cinematicMoves"] if m != "OVERHEAT"]   # stale legacy template
+    b = parse(entries).by_id()
+    assert "OVERHEAT" in b["CHARIZARD"].charged_moves                                # the _NORMAL template is used
+
+
+def test_formless_placeholder_without_a_matching_named_form_is_dropped():
+    entries = _entries()
+    for e in entries:
+        p = e.get("data", {}).get("pokemonSettings")
+        if p and p["pokemonId"] == "GIRATINA" and not p.get("form"):
+            p["type2"] = "POKEMON_TYPE_FAIRY"                                           # like ZACIAN's bogus base row
+    ids = {p.id for p in parse(entries).pokemon if p.species == "GIRATINA"}
+    assert "GIRATINA" not in ids and {"GIRATINA_ALTERED", "GIRATINA_ORIGIN"} <= ids
+
+
+def test_deployable_flag_comes_from_game_master(gm):
+    b = gm.by_id()
+    assert b["CHARIZARD"].deployable and b["BLISSEY"].deployable
+    assert not b["MEWTWO"].deployable and not b["MEW"].deployable and not b["KARTANA"].deployable
+
+
+def test_evolutions_carry_target_form(gm):
+    b = gm.by_id()
+    assert ("DARMANITAN", "GALARIAN_STANDARD") in {(e.species, e.form) for e in b["DARUMAKA_GALARIAN"].evolutions}
+    assert ("RAICHU", None) in {(e.species, e.form) for e in b["PIKACHU"].evolutions}

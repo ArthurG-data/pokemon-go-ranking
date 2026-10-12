@@ -75,3 +75,15 @@ def test_pokemon_that_cannot_defend_show_a_dash(site, page):
     expect(row.locator("td").last).to_have_text("–")
     page.goto(site + "#gym")
     expect(page.locator(".crumbs")).to_contain_text("bulk weighted 3:1 over damage")
+
+
+def test_sorting_reorders_the_top_n_instead_of_changing_it(site, page):
+    page.goto(site + "#type/FIRE")
+    page.select_option("#topn", "10")
+    top_before = set(page.locator("table.rk tbody tr td:nth-child(2)").all_inner_texts())
+    page.locator('th[data-sort="name"]').click()
+    names = page.locator("table.rk tbody tr td:nth-child(2)").all_inner_texts()
+    ranks = page.locator("table.rk tbody tr td:nth-child(1)").all_inner_texts()
+    assert set(names) == top_before                                  # same 10 Pokémon …
+    assert sorted(int(r) for r in ranks) == list(range(1, 11))       # … still numbered by ranking position
+    assert ranks != [str(i) for i in range(1, 11)]                   # and the # column moved with them
