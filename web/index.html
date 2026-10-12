@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GO Raid Helper</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="#">GO Raid Helper</a>
+  <nav class="tabs">
+    <a href="#" data-tab="types">Types</a>
+    <a href="#gym" data-tab="gym">Gym defenders</a>
+  </nav>
+  <div class="search">
+    <input id="search" type="search" placeholder="Search a Pokémon…" autocomplete="off" spellcheck="false">
+    <ul id="search-results" hidden></ul>
+  </div>
+</header>
+<section class="filters">
+  <span class="muted">Hide:</span>
+  <label><input type="checkbox" id="f-legendary" data-filter="legendary"> Legendary</label>
+  <label><input type="checkbox" id="f-mythical" data-filter="mythical"> Mythical</label>
+  <label><input type="checkbox" id="f-mega" data-filter="mega"> Mega</label>
+  <label><input type="checkbox" id="f-shadow" data-filter="shadow"> Shadow</label>
+  <label><input type="checkbox" id="f-elite" data-filter="elite"> Elite TM moves</label>
+  <span class="spacer"></span>
+  <div class="toggle" id="mode">
+    <button type="button" data-mode="attackers">Attackers</button>
+    <button type="button" data-mode="counters">Counters</button>
+  </div>
+  <label>Top
+    <select id="topn">
+      <option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="0">all</option>
+    </select>
+  </label>
+</section>
+<main id="view"><p class="muted">Loading data…</p></main>
+<footer class="muted" id="built"></footer>
+<script src="app.js"></script>
+</body>
+</html>

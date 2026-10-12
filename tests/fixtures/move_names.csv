@@ -1,0 +1,223 @@
+move_id,local_language_id,name
+1,5,Écras’Face
+1,9,Pound
+7,5,Poing Feu
+7,9,Fire Punch
+8,5,Poing Glace
+8,9,Ice Punch
+9,5,Poing Éclair
+9,9,Thunder Punch
+10,5,Griffe
+10,9,Scratch
+15,5,Coupe
+15,9,Cut
+17,5,Cru-Ailes
+17,9,Wing Attack
+19,5,Vol
+19,9,Fly
+33,5,Charge
+33,9,Tackle
+52,5,Flammèche
+52,9,Ember
+53,5,Lance-Flammes
+53,9,Flamethrower
+56,5,Hydrocanon
+56,9,Hydro Pump
+57,5,Surf
+57,9,Surf
+58,5,Laser Glace
+58,9,Ice Beam
+59,5,Blizzard
+59,9,Blizzard
+63,5,Ultralaser
+63,9,Hyper Beam
+68,5,Riposte
+68,9,Counter
+75,5,Tranch’Herbe
+75,9,Razor Leaf
+76,5,Lance-Soleil
+76,9,Solar Beam
+83,5,Danse Flammes
+83,9,Fire Spin
+84,5,Éclair
+84,9,Thunder Shock
+85,5,Tonnerre
+85,9,Thunderbolt
+87,5,Fatal-Foudre
+87,9,Thunder
+88,5,Jet-Pierres
+88,9,Rock Throw
+89,5,Séisme
+89,9,Earthquake
+93,5,Choc Mental
+93,9,Confusion
+94,5,Psyko
+94,9,Psychic
+98,5,Vive-Attaque
+98,9,Quick Attack
+126,5,Déflagration
+126,9,Fire Blast
+127,5,Cascade
+127,9,Waterfall
+129,5,Météores
+129,9,Swift
+130,5,Coud’Krâne
+130,9,Skull Bash
+143,5,Piqué
+143,9,Sky Attack
+144,5,Morphing
+144,9,Transform
+157,5,Éboulement
+157,9,Rock Slide
+165,5,Lutte
+165,9,Struggle
+177,5,Aéroblast
+177,9,Aeroblast
+192,5,Élecanon
+192,9,Zap Cannon
+200,5,Colère
+200,9,Outrage
+204,5,Charme
+204,9,Charm
+209,5,Étincelle
+209,9,Spark
+210,5,Taillade
+210,9,Fury Cutter
+211,5,Ailes d’Acier
+211,9,Steel Wing
+217,5,Cadeau
+217,9,Present
+223,5,Dynamo-Poing
+223,9,Dynamic Punch
+225,5,Draco-Souffle
+225,9,Dragon Breath
+231,5,Queue de Fer
+231,9,Iron Tail
+246,5,Pouvoir Antique
+246,9,Ancient Power
+247,5,Ball’Ombre
+247,9,Shadow Ball
+249,5,Éclate-Roc
+249,9,Rock Smash
+280,5,Casse-Brique
+280,9,Brick Break
+307,5,Rafale Feu
+307,9,Blast Burn
+309,5,Poing Météore
+309,9,Meteor Mash
+310,5,Étonnement
+310,9,Astonish
+314,5,Tranch’Air
+314,9,Air Cutter
+315,5,Surchauffe
+315,9,Overheat
+326,5,Extrasenseur
+326,9,Extrasensory
+332,5,Aéropique
+332,9,Aerial Ace
+337,5,Draco-Griffe
+337,9,Dragon Claw
+341,5,Tir de Boue
+341,9,Mud Shot
+344,5,Électacle
+344,9,Volt Tackle
+348,5,Lame Feuille
+348,9,Leaf Blade
+354,5,Psycho-Boost
+354,9,Psycho Boost
+360,5,Gyroballe
+360,9,Gyro Ball
+398,5,Direct Toxik
+398,9,Poison Jab
+399,5,Vibrobscur
+399,9,Dark Pulse
+400,5,Tranche-Nuit
+400,9,Night Slash
+403,5,Lame d’Air
+403,9,Air Slash
+404,5,Plaie Croix
+404,9,X-Scissor
+406,5,Draco-Choc
+406,9,Dragon Pulse
+411,5,Exploforce
+411,9,Focus Blast
+412,5,Éco-Sphère
+412,9,Energy Ball
+414,5,Telluriforce
+414,9,Earth Power
+419,5,Avalanche
+419,9,Avalanche
+421,5,Griffe Ombre
+421,9,Shadow Claw
+423,5,Crocs Givre
+423,9,Ice Fang
+424,5,Crocs Feu
+424,9,Fire Fang
+425,5,Ombre Portée
+425,9,Shadow Sneak
+427,5,Coupe Psycho
+427,9,Psycho Cut
+428,5,Psykoud’Boul
+428,9,Zen Headbutt
+430,5,Luminocanon
+430,9,Flash Cannon
+435,5,Coup d’Jus
+435,9,Discharge
+437,5,Tempête Verte
+437,9,Leaf Storm
+444,5,Lame de Roc
+444,9,Stone Edge
+447,5,Nœud Herbe
+447,9,Grass Knot
+451,5,Rayon Chargé
+451,9,Charge Beam
+466,5,Vent Mauvais
+466,9,Ominous Wind
+467,5,Revenant
+467,9,Shadow Force
+473,5,Choc Psy
+473,9,Psyshock
+481,5,Rebondifeu
+481,9,Flame Burst
+488,5,Nitrocharge
+488,9,Flame Charge
+490,5,Balayette
+490,9,Low Sweep
+510,5,Calcination
+510,9,Incinerate
+521,5,Change Éclair
+521,9,Volt Switch
+522,5,Survinsecte
+522,9,Struggle Bug
+523,5,Piétisol
+523,9,Bulldoze
+524,5,Souffle Glacé
+524,9,Frost Breath
+525,5,Draco-Queue
+525,9,Dragon Tail
+528,5,Éclair Fou
+528,9,Wild Charge
+533,5,Lame Sainte
+533,9,Sacred Sword
+540,5,Frappe Psy
+540,9,Psystrike
+555,5,Aboiement
+555,9,Snarl
+560,5,Flying Press
+560,9,Flying Press
+574,5,Voix Enjôleuse
+574,9,Disarming Voice
+577,5,Vampibaiser
+577,9,Draining Kiss
+583,5,Câlinerie
+583,9,Play Rough
+605,5,Éclat Magique
+605,9,Dazzling Gleam
+611,5,Harcèlement
+611,9,Infestation
+618,5,Onde Originelle
+618,9,Origin Pulse
+848,5,Typhon Pyrosable
+848,9,Sandsear Storm
+885,5,Désherbaffe
+885,9,Trailblaze
