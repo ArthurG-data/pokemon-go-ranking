@@ -44,7 +44,7 @@ Each row shows the best moveset, an *ETM* badge if that moveset needs an Elite T
 
 ![Searching "ossa" finds Ossatueur and its forms](docs/screenshots/3-search.png)
 
-**5. Read its card and decide.** Ossatueur (Marowak) ranks **#157 of 277** Ground attackers and #525 as a gym defender.
+**5. Read its card and decide.** Ossatueur (Marowak) ranks **#69 of 122** Ground attackers and #377 of 965 as a gym defender.
 **That's a transfer.** The *How to get it* box also tells you it takes 50 Osselait candy, and that there's a shadow
 version from Team GO Rocket if you want a stronger one later.
 
@@ -89,12 +89,18 @@ python3 -m http.server -d web 8000     # then open http://localhost:8000
 
 The rule of thumb above rests on two scores.
 
-- **Attack.** Each Pokémon is scored at level 40 with perfect IVs. The score is `(DPS³ × TDO)^¼` from
-  the comboDPS formula, against a reference boss with defense 180.
-  - **Attackers** of a type are Pokémon whose charged move is of that type.
-  - **Counters** to a type apply type effectiveness against a boss of that type.
+- **Attack.** Each Pokémon is scored at level 40 with perfect IVs, against a reference boss with defense 180.
+  - **DPS** (damage per second) comes from the comboDPS formula, with the ×1.2 bonus when a move matches
+    the Pokémon's type.
+  - **TDO** (total damage before fainting) is DPS multiplied by how long the Pokémon survives.
+  - **The score is `√(DPS × TDO)`**, so hitting hard and staying alive count equally.
+  - **Attackers** of a type are Pokémon *of that type* using a charged move of that type. A Dragon with Hydro Pump
+    is not a Water attacker.
+  - **Counters** to a type are any Pokémon. Type effectiveness against that boss (×1.6 super effective,
+    ×0.625 or ×0.39 resisted) is applied to DPS, TDO and the score.
 - **Defend.** This is a gym heuristic: `(HP × defense)^0.75 × DPS^0.25`, so bulk matters more than damage.
-  Megas, Primals and Mythicals get no defend score, because the game doesn't let them stay in a gym.
+  Only Pokémon the game lets you place in a gym get one. Legendaries, Mythicals, Ultra Beasts, Megas and Shadows
+  can't defend, so they show a dash.
 
 These are estimates to help you decide what to keep, not battle simulations.
 
