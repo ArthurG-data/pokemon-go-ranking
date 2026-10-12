@@ -1,0 +1,17 @@
+[project]
+name = "pokemon-go-ranking"
+version = "0.1.0"
+description = "Pokémon GO raid attacker / gym defender rankings, computed from the Game Master"
+requires-python = ">=3.12"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "pytest-playwright>=0.5",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q"
