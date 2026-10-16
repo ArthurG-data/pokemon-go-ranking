@@ -37,8 +37,11 @@ def _movesets(p: Pokemon, gm: GameMaster, stats: Stats) -> list[dict]:
 
 
 def can_defend_gym(p: Pokemon) -> bool:
-    """Megas/Primals revert before they can be placed, and Mythicals are not allowed in gyms."""
-    return p.mega is None and not p.mythical
+    """Only deployable Pokémon (not Legendary/Mythical/UB per the Game Master) in normal form can be placed.
+
+    Megas/Primals revert before they can be placed, and Shadow Pokémon cannot be placed in gyms.
+    """
+    return p.deployable and p.mega is None and not p.is_shadow
 
 
 def _defender(p: Pokemon, gm: GameMaster, stats: Stats, *, allow_elite: bool) -> dict:
@@ -69,23 +72,50 @@ def _sources(p: Pokemon) -> list[str]:
     return ["evolve"] if p.parent else ["wild", "eggs"]
 
 
-def _evo_line(p: Pokemon, base_of: dict[str, Pokemon], names: Names) -> list[dict]:
-    chain = [p.species]
-    cur = base_of.get(p.species)
-    while cur is not None and cur.parent and cur.parent not in chain:
-        chain.insert(0, cur.parent)
-        cur = base_of.get(cur.parent)
-    line = []
-    for i, species in enumerate(chain):
-        row = p if i == len(chain) - 1 else base_of.get(species)
-        if row is None:
-            line.append({"id": species, "name_fr": species.title(), "sprite": None, "candy": None})
+def _child_of(gm: GameMaster) -> dict[str, tuple[str, int]]:
+    """Row id -> (parent row id, candy), from evolutionBranch targets (form-aware: Galarian lines stay Galarian)."""
+    ids = {p.id for p in gm.pokemon}
+    child_of: dict[str, tuple[str, int]] = {}
+    for p in gm.pokemon:
+        if p.is_shadow or p.mega:
             continue
-        candy = None
-        if i < len(chain) - 1:
-            candy = next((e.candy for e in row.evolutions if e.species == chain[i + 1]), None)
+        for e in p.evolutions:
+            target = f"{e.species}_{e.form}" if e.form else e.species
+            if target not in ids:
+                target = e.species if e.species in ids else None   # e.g. DARMANITAN_STANDARD is the DARMANITAN row
+            if target and target != p.id:
+                child_of.setdefault(target, (p.id, e.candy))
+    return child_of
+
+
+def _anchor_id(p: Pokemon) -> str:
+    """The plain-form row a shadow or mega row belongs to."""
+    if p.is_shadow:
+        return p.id.removesuffix("_SHADOW")
+    if p.mega:
+        return p.id.removesuffix("_" + p.mega)
+    return p.id
+
+
+def _evo_line(p: Pokemon, by_id: dict[str, Pokemon], child_of: dict[str, tuple[str, int]],
+              base_of: dict[str, Pokemon], names: Names) -> list[dict]:
+    chain = [_anchor_id(p)]
+    while chain[0] in child_of and child_of[chain[0]][0] not in chain:
+        chain.insert(0, child_of[chain[0]][0])
+    candies = [child_of[c][1] for c in chain[1:]]
+    if len(chain) == 1:   # no branch points here: fall back to walking parentPokemonId by species
+        cur = by_id.get(chain[0]) or p
+        while cur.parent and cur.parent in base_of and base_of[cur.parent].id not in chain:
+            parent = base_of[cur.parent]
+            candies.insert(0, next((e.candy for e in parent.evolutions if e.species == cur.species), None))
+            chain.insert(0, parent.id)
+            cur = parent
+    line = []
+    for i, rid in enumerate(chain):
+        row = p if i == len(chain) - 1 else by_id[rid]
         line.append({"id": row.id, "name_fr": pokemon_name(row, names, "fr"),
-                     "sprite": SPRITE_URL.format(sprite_id(row, names)), "candy": candy})
+                     "sprite": SPRITE_URL.format(sprite_id(row, names)),
+                     "candy": candies[i] if i < len(chain) - 1 else None})
     return line
 
 
@@ -99,6 +129,8 @@ def build_data(gm: GameMaster, names: Names, now_by_id: dict[str, list[Now]], bu
             base_of.setdefault(p.species, p)
     for p in gm.pokemon:
         base_of.setdefault(p.species, p)
+    by_id = gm.by_id()
+    child_of = _child_of(gm)
 
     rows = []
     for p in gm.pokemon:
@@ -117,7 +149,7 @@ def build_data(gm: GameMaster, names: Names, now_by_id: dict[str, list[Now]], bu
             "defender": _defender(p, gm, stats, allow_elite=True),
             "defender_no_elite": _defender(p, gm, stats, allow_elite=False),
             "get": {
-                "evo_line": _evo_line(p, base_of, names),
+                "evo_line": _evo_line(p, by_id, child_of, base_of, names),
                 "buddy_km": p.buddy_km,
                 "has_shadow": p.has_shadow or p.is_shadow,
                 "megas": [f"{p.id}_{m}" for m in p.mega_ids],

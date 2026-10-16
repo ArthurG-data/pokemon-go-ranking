@@ -87,8 +87,34 @@ def test_build_writes_json(tmp_path, capsys):
 
 
 def test_pokemon_that_cannot_defend_gyms_get_no_defender_rating(by):
-    for pid in ("CHARIZARD_MEGA_Y", "KYOGRE_PRIMAL", "MEW"):
+    # Megas/Primals revert, Shadows cannot be placed, Legendaries/Mythicals/Ultra Beasts are not deployable.
+    for pid in ("CHARIZARD_MEGA_Y", "KYOGRE_PRIMAL", "MEW", "CHARIZARD_SHADOW", "MEWTWO", "LUGIA", "KARTANA"):
         assert by[pid]["defender"] == {"rating": 0, "fast": None, "charged": None}, pid
         assert by[pid]["defender_no_elite"]["rating"] == 0, pid
-    assert by["CHARIZARD_SHADOW"]["defender"]["rating"] > 0      # shadows can defend
-    assert by["MEWTWO"]["defender"]["rating"] > 0                 # legendaries can defend
+    assert by["CHARIZARD"]["defender"]["rating"] > 0 and by["BLISSEY"]["defender"]["rating"] > 0
+
+
+def test_regional_evolution_lines_follow_the_regional_forms(gm_fx, names_fx):
+    from pipeline.gamemaster import Evolution, GameMaster, Pokemon
+    rows = [
+        Pokemon("ZIGZAGOON", "ZIGZAGOON", 263, None, ("NORMAL",), 58, 80, 116,
+                evolutions=(Evolution("LINOONE", 50),)),
+        Pokemon("ZIGZAGOON_GALARIAN", "ZIGZAGOON", 263, "GALARIAN", ("DARK", "NORMAL"), 58, 80, 116,
+                evolutions=(Evolution("LINOONE", 25, "GALARIAN"),)),
+        Pokemon("LINOONE", "LINOONE", 264, None, ("NORMAL",), 142, 128, 186, parent="ZIGZAGOON"),
+        Pokemon("LINOONE_GALARIAN", "LINOONE", 264, "GALARIAN", ("DARK", "NORMAL"), 142, 128, 186,
+                parent="ZIGZAGOON", evolutions=(Evolution("OBSTAGOON", 100),)),
+        Pokemon("OBSTAGOON", "OBSTAGOON", 862, None, ("DARK", "NORMAL"), 180, 194, 212, parent="ZIGZAGOON"),
+    ]
+    data = build_data(GameMaster(rows, {}, gm_fx.type_chart), names_fx, {}, built="2026-10-12")
+    line = {r["id"]: r["get"]["evo_line"] for r in data["pokemon"]}
+    assert [(e["id"], e["candy"]) for e in line["OBSTAGOON"]] == [
+        ("ZIGZAGOON_GALARIAN", 25), ("LINOONE_GALARIAN", 100), ("OBSTAGOON", None)]
+    assert [e["id"] for e in line["LINOONE"]] == ["ZIGZAGOON", "LINOONE"]
+
+
+def test_evolution_target_form_falls_back_to_the_species_row(by):
+    # Darumaka's branch names DARMANITAN_STANDARD; that form is the plain DARMANITAN row.
+    assert [(e["id"], e["candy"]) for e in by["DARMANITAN"]["get"]["evo_line"]] == [("DARUMAKA", 50), ("DARMANITAN", None)]
+    assert [e["id"] for e in by["DARMANITAN_GALARIAN_STANDARD"]["get"]["evo_line"]] == [
+        "DARUMAKA_GALARIAN", "DARMANITAN_GALARIAN_STANDARD"]
