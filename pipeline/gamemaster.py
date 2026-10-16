@@ -40,6 +40,7 @@ class Move:
 class Evolution:
     species: str
     candy: int
+    form: str | None = None   # target form suffix, e.g. "GALARIAN" for LINOONE_GALARIAN
 
 
 @dataclass
@@ -64,6 +65,7 @@ class Pokemon:
     has_shadow: bool = False
     mega_ids: tuple[str, ...] = ()
     evolutions: tuple[Evolution, ...] = ()
+    deployable: bool = True   # Game Master isDeployable: can be placed in a gym (absent for Legendary/Mythical/UB)
 
     @property
     def legendary(self) -> bool:
@@ -155,9 +157,36 @@ def parse(entries: list[dict]) -> GameMaster:
     return GameMaster(pokemon, moves, chart)
 
 
+def _template_key(p: dict) -> tuple:
+    s = p.get("stats") or {}
+    return (s.get("baseAttack"), s.get("baseDefense"), s.get("baseStamina"), p.get("type"), p.get("type2"),
+            tuple(sorted(p.get("quickMoves", []))), tuple(sorted(p.get("cinematicMoves", []))))
+
+
+def _drop_stale_formless(raw_rows: list[tuple[int, dict]]) -> list[tuple[int, dict]]:
+    """Formless templates are legacy placeholders when the species also has form templates.
+
+    Keep a formless template only if no `_NORMAL` template exists and it is identical to one of the named
+    forms (then it simply names the default row). Otherwise the form templates are authoritative.
+    """
+    by_species: dict[str, list[dict]] = {}
+    for _, p in raw_rows:
+        by_species.setdefault(p["pokemonId"], []).append(p)
+    keep = []
+    for dex, p in raw_rows:
+        if not p.get("form"):
+            siblings = [q for q in by_species[p["pokemonId"]] if q.get("form")]
+            has_normal = any(q["form"].endswith("_NORMAL") for q in siblings)
+            named_keys = {_template_key(q) for q in siblings if not q["form"].endswith("_NORMAL")}
+            if has_normal or (siblings and _template_key(p) not in named_keys):
+                continue
+        keep.append((dex, p))
+    return keep
+
+
 def _build_pokemon(raw_rows: list[tuple[int, dict]]) -> list[Pokemon]:
     groups: dict[tuple, list[tuple[int, str | None, dict]]] = {}
-    for dex, p in raw_rows:
+    for dex, p in _drop_stale_formless(raw_rows):
         species = p["pokemonId"]
         form = _form_suffix(species, p.get("form"))
         if form and COSTUME_RE.search(form):
@@ -187,7 +216,8 @@ def _build_pokemon(raw_rows: list[tuple[int, dict]]) -> list[Pokemon]:
                 if t.get("tempEvoId") and t.get("stats"):
                     temp_evos.setdefault(t["tempEvoId"].removeprefix(_TEMP_PREFIX), t)
         pokemon_class = (p.get("pokemonClass") or "").removeprefix(_CLASS_PREFIX) or None
-        evolutions = tuple(Evolution(b["evolution"], int(b.get("candyCost", 0)))
+        evolutions = tuple(Evolution(b["evolution"], int(b.get("candyCost", 0)),
+                                     _form_suffix(b["evolution"], b.get("form")))
                            for b in p.get("evolutionBranch", []) if b.get("evolution"))
         base = Pokemon(
             id=row_id, species=species, dex=dex, form=form, types=types,
@@ -196,6 +226,7 @@ def _build_pokemon(raw_rows: list[tuple[int, dict]]) -> list[Pokemon]:
             elite_fast=tuple(p.get("eliteQuickMove", [])), elite_charged=tuple(p.get("eliteCinematicMove", [])),
             parent=p.get("parentPokemonId"), buddy_km=p.get("kmBuddyDistance"),
             has_shadow=has_shadow, mega_ids=tuple(temp_evos), evolutions=evolutions,
+            deployable=any(m[2].get("isDeployable") for m in members),
         )
         out.append(base)
         if has_shadow:
