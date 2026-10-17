@@ -24,8 +24,8 @@ jobs:
       - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
       - name: Rebuild web/data.json from the latest Game Master and LeekDuck feed
         run: uv run --no-dev python -m pipeline.build
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v5
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: web
 
